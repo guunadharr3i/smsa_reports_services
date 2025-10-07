@@ -10,7 +10,7 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
 @SpringBootApplication(scanBasePackages = {"com.smsaSchedulers.Schedulers"})
-public class SchedulersApplication  {
+public class SchedulersApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         SpringApplication.run(SchedulersApplication.class, args);
