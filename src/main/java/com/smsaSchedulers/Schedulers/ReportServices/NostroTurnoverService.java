@@ -115,7 +115,7 @@ public class NostroTurnoverService {
                 map.put("SendRecTime", getValue(row, 6));
                 map.put("ValueDate", getValue(row, 7));
                 map.put("Currency", getValue(row, 8));
-                map.put("Reference", getValue(row, 9));
+                map.put("References", getValue(row, 9));
                 map.put("Code", getValue(row, 10));
                 map.put("EntryDate", getValue(row, 11));
                 map.put("DebitCreditMark", getValue(row, 12));
