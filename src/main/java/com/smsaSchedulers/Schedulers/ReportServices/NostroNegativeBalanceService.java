@@ -13,6 +13,7 @@ import javax.persistence.Query;
 import org.springframework.data.domain.PageImpl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ public class NostroNegativeBalanceService {
 
         List<Map<String, String>> dataMapList = new ArrayList<>();
         StringBuilder queryBuilder = new StringBuilder();
+        filter.setMtCodes(Arrays.asList(940, 950));
 
         try {
             // ---------- Base SELECT ----------
@@ -153,7 +155,7 @@ public class NostroNegativeBalanceService {
 
     public List<Map<String, String>> downloadNostroClosingBalanceData(NostroClosingBalanceFilter filter) {
         logger.info("Starting downloadNostroClosingBalanceData with filter: {}", filter);
-
+        filter.setMtCodes(Arrays.asList(940, 950));
         List<Map<String, String>> dataMapList = new ArrayList<>();
         StringBuilder queryBuilder = new StringBuilder();
 

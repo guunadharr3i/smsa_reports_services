@@ -12,6 +12,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class NostroClosingBalanceService {
     public Page<Map<String, String>> filterNostroClosingBalanceData(NostroClosingBalanceFilter filter, Pageable pageable) {
         logger.info("Starting filterNostroClosingBalanceData with filter: {} and pageable: {}", filter, pageable);
 
+        filter.setMtCodes(Arrays.asList(940, 950));
         List<Map<String, String>> dataMapList = new ArrayList<>();
         StringBuilder queryBuilder = new StringBuilder();
 
@@ -120,17 +122,29 @@ public class NostroClosingBalanceService {
     private void bindNostroParams(Query query, NostroClosingBalanceFilter filter) {
         logger.info("Binding query parameters for filter: {}", filter);
 
-        if (filter.getFromDate() != null) query.setParameter("fromDate", filter.getFromDate());
-        if (filter.getToDate() != null) query.setParameter("toDate", filter.getToDate());
-        if (filter.getMtCodes() != null && !filter.getMtCodes().isEmpty()) query.setParameter("mtCodes", filter.getMtCodes());
-        if (filter.getGeoIds() != null && !filter.getGeoIds().isEmpty()) query.setParameter("geoIds", filter.getGeoIds());
-        if (filter.getAccountNumber() != null && !filter.getAccountNumber().isEmpty()) query.setParameter("accountNumber", filter.getAccountNumber());
-        if (filter.getCurrency() != null && !filter.getCurrency().isEmpty()) query.setParameter("currency", filter.getCurrency());
+        if (filter.getFromDate() != null) {
+            query.setParameter("fromDate", filter.getFromDate());
+        }
+        if (filter.getToDate() != null) {
+            query.setParameter("toDate", filter.getToDate());
+        }
+        if (filter.getMtCodes() != null && !filter.getMtCodes().isEmpty()) {
+            query.setParameter("mtCodes", filter.getMtCodes());
+        }
+        if (filter.getGeoIds() != null && !filter.getGeoIds().isEmpty()) {
+            query.setParameter("geoIds", filter.getGeoIds());
+        }
+        if (filter.getAccountNumber() != null && !filter.getAccountNumber().isEmpty()) {
+            query.setParameter("accountNumber", filter.getAccountNumber());
+        }
+        if (filter.getCurrency() != null && !filter.getCurrency().isEmpty()) {
+            query.setParameter("currency", filter.getCurrency());
+        }
     }
 
     public List<Map<String, String>> downloadNostroClosingBalanceData(NostroClosingBalanceFilter filter) {
         logger.info("Starting downloadNostroClosingBalanceData with filter: {}", filter);
-
+        filter.setMtCodes(Arrays.asList(940, 950));
         List<Map<String, String>> dataMapList = new ArrayList<>();
         StringBuilder queryBuilder = new StringBuilder();
 
@@ -153,12 +167,24 @@ public class NostroClosingBalanceService {
             queryBuilder.append("INNER JOIN SMSA_MSG_TXT t ON h.SMSA_MESSAGE_ID = t.SMSA_MESSAGE_ID ");
             queryBuilder.append("WHERE h.SMSA_MSG_IO = 'O' AND t.SMSA_CLOSING_62F IS NOT NULL ");
 
-            if (filter.getFromDate() != null) queryBuilder.append(" AND h.SMSA_FILE_DATE >= :fromDate ");
-            if (filter.getToDate() != null) queryBuilder.append(" AND h.SMSA_FILE_DATE <= :toDate ");
-            if (filter.getMtCodes() != null && !filter.getMtCodes().isEmpty()) queryBuilder.append(" AND h.SMSA_MT_CODE IN :mtCodes ");
-            if (filter.getGeoIds() != null && !filter.getGeoIds().isEmpty()) queryBuilder.append(" AND h.SMSA_GEO_ID IN :geoIds ");
-            if (filter.getAccountNumber() != null && !filter.getAccountNumber().isEmpty()) queryBuilder.append(" AND na.SMSA_NOSTRO_ACCOUNT = :accountNumber ");
-            if (filter.getCurrency() != null && !filter.getCurrency().isEmpty()) queryBuilder.append(" AND t.SMSA_MSG_CLOSE_CCY = :currency ");
+            if (filter.getFromDate() != null) {
+                queryBuilder.append(" AND h.SMSA_FILE_DATE >= :fromDate ");
+            }
+            if (filter.getToDate() != null) {
+                queryBuilder.append(" AND h.SMSA_FILE_DATE <= :toDate ");
+            }
+            if (filter.getMtCodes() != null && !filter.getMtCodes().isEmpty()) {
+                queryBuilder.append(" AND h.SMSA_MT_CODE IN :mtCodes ");
+            }
+            if (filter.getGeoIds() != null && !filter.getGeoIds().isEmpty()) {
+                queryBuilder.append(" AND h.SMSA_GEO_ID IN :geoIds ");
+            }
+            if (filter.getAccountNumber() != null && !filter.getAccountNumber().isEmpty()) {
+                queryBuilder.append(" AND na.SMSA_NOSTRO_ACCOUNT = :accountNumber ");
+            }
+            if (filter.getCurrency() != null && !filter.getCurrency().isEmpty()) {
+                queryBuilder.append(" AND t.SMSA_MSG_CLOSE_CCY = :currency ");
+            }
 
             queryBuilder.append(" ORDER BY h.SMSA_FILE_DATE DESC ");
             logger.info("Constructed Download Query: {}", queryBuilder);
