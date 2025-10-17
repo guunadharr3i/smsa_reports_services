@@ -158,23 +158,51 @@ public class NostroNegativeBalanceService {
         StringBuilder queryBuilder = new StringBuilder();
 
         try {
+            // ---------- Base SELECT ----------
             queryBuilder.append("SELECT ");
             queryBuilder.append("h.SMSA_GEO_ID AS Geo_ID, ");
             queryBuilder.append("h.SMSA_SENDER_BIC AS Sender, ");
             queryBuilder.append("h.SMSA_RECEIVER_BIC AS Receiver, ");
             queryBuilder.append("h.SMSA_MT_CODE AS Message_Type, ");
-            queryBuilder.append("na.SMSA_NOSTRO_ACCOUNT AS Account_No, ");
+            queryBuilder.append("t.SMSA_TRXN_ACC_ID AS Account_No, ");
             queryBuilder.append("JSON_VALUE(h.smsa_hdr_obj, '$.Receiver_obj.BANK_NAME') AS SenderBankName, ");
-            queryBuilder.append("t.SMSA_MSG_CLOSE_CCY AS Currency, ");
+            queryBuilder.append("COALESCE( ");
+            queryBuilder.append("JSON_VALUE(t.SMSA_MSG_TXTJ, '$.\"62M_obj\".Currency' RETURNING VARCHAR2 NULL ON ERROR), ");
+            queryBuilder.append("JSON_VALUE(t.SMSA_MSG_TXTJ, '$.\"62F_obj\".Currency' RETURNING VARCHAR2 NULL ON ERROR) ");
+            queryBuilder.append(") AS CURRENCY, ");
             queryBuilder.append("h.SMSA_FILE_DATE AS FileDate, ");
-            queryBuilder.append("h.SMSA_MSG_VALDATE AS ValueDate, ");
+            queryBuilder.append("t.SMSA_MSG_VALDATE62F AS ValueDate, ");
             queryBuilder.append("t.SMSA_CLOSING_62F AS ClosingBalance, ");
-            queryBuilder.append("t.SMSA_MSG_CLOSE_CRED AS CreditFlag ");
-            queryBuilder.append("FROM smsa_prt_message_hdr h ");
-            queryBuilder.append("INNER JOIN SMSA_NOSTRO_ACCOUNT_MASTER na ON na.SMSA_MESSAGE_ID = h.SMSA_MESSAGE_ID ");
-            queryBuilder.append("INNER JOIN SMSA_MSG_TXT t ON h.SMSA_MESSAGE_ID = t.SMSA_MESSAGE_ID ");
+            queryBuilder.append("t.SMSA_MSG_CLOSE_CRED AS CRDR ");
+            queryBuilder.append("FROM SMSA_MSG_TXT t ");
+            queryBuilder.append("INNER JOIN smsa_prt_message_hdr h ON h.SMSA_MESSAGE_ID = t.SMSA_MESSAGE_ID ");
             queryBuilder.append("WHERE h.SMSA_MSG_IO = 'O' AND t.SMSA_CLOSING_62F IS NOT NULL ");
-            logger.info("Generated Download Query: {}", queryBuilder);
+            queryBuilder.append("AND t.smsa_msg_close_cred = 'Debit' ");
+
+            // ---------- Apply Filters Dynamically ----------
+            if (filter.getFromDate() != null) {
+                queryBuilder.append(" AND h.SMSA_FILE_DATE >= :fromDate ");
+            }
+            if (filter.getToDate() != null) {
+                queryBuilder.append(" AND h.SMSA_FILE_DATE <= :toDate ");
+            }
+            if (filter.getMtCodes() != null && !filter.getMtCodes().isEmpty()) {
+                queryBuilder.append(" AND h.SMSA_MT_CODE IN :mtCodes ");
+            }
+            if (filter.getGeoIds() != null && !filter.getGeoIds().isEmpty()) {
+                queryBuilder.append(" AND h.SMSA_GEO_ID IN :geoIds ");
+            }
+            if (filter.getAccountNumber() != null && !filter.getAccountNumber().isEmpty()) {
+                queryBuilder.append(" AND t.SMSA_TRXN_ACC_ID = :accountNumber ");
+            }
+            if (filter.getCurrency() != null && !filter.getCurrency().isEmpty()) {
+                queryBuilder.append(" AND t.SMSA_MSG_CLOSE_CCY = :currency ");
+            }
+
+            // ---------- Order ----------
+            queryBuilder.append(" ORDER BY h.SMSA_FILE_DATE DESC ");
+
+            logger.info("Generated Query: {}", queryBuilder);
 
             int batchSize = 1000;
             int offset = 0;

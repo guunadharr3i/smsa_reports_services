@@ -10,6 +10,7 @@
     </parent>
     <groupId>com.smsaSchedulers</groupId>
     <artifactId>Schedulers</artifactId>
+    <artifactId>Reports</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Schedulers</name>
     <description>project for Smsa Report Schedulers</description>
