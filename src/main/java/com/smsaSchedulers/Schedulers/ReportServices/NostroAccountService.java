@@ -68,6 +68,12 @@ public class NostroAccountService {
         if (filter.getCurrency() != null && !filter.getCurrency().isEmpty()) {
             queryBuilder.append(" AND t.smsa_msg_open_ccy = :currency ");
         }
+        if (filter.getValueDateFrom() != null) {
+            queryBuilder.append(" AND t.smsa_msg_valdate62f >= :valueDateFrom ");
+        }
+        if (filter.getValueDateTo() != null) {
+            queryBuilder.append(" AND t.smsa_msg_valdate62f <= :valueDateTo ");
+        }
 
         queryBuilder.append(" ORDER BY h.smsa_file_date DESC ");
 
